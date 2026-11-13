@@ -1,4 +1,6 @@
-from app.core.config import get_settings
+def main():
+    print("Hello from palm-mind!")
 
-settings = get_settings()
-print(settings)
+
+if __name__ == "__main__":
+    main()
