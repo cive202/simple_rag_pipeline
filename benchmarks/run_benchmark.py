@@ -1,6 +1,6 @@
 """Benchmark chunking strategies and Qdrant distances with Azure OpenAI embeddings.
 
-Generates retrieval accuracy (hit@k) and latency numbers used in FINDINGS.md.
+Generates retrieval accuracy (hit@k) and latency numbers used in findings.md.
 Run with the project venv while Qdrant is up:
 
     .venv/bin/python -m benchmarks.run_benchmark
@@ -25,7 +25,7 @@ from app.services.embeddings import embed_texts
 
 
 DEFAULT_PARQUET_CORPUS = Path("train-00000-of-00001.parquet")
-DEFAULT_FINDINGS_PATH = Path("FINDINGS.md")
+DEFAULT_FINDINGS_PATH = Path("findings.md")
 
 QDRANT = QdrantClient(
     url=settings.qdrant_url,
@@ -482,7 +482,7 @@ def main() -> None:
     parser.add_argument(
         "--findings-path",
         default=str(DEFAULT_FINDINGS_PATH),
-        help="Where to write FINDINGS markdown",
+        help="Where to write findings markdown",
     )
     args = parser.parse_args()
 

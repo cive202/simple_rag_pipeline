@@ -19,3 +19,24 @@ def on_startup() -> None:
 @app.get("/health", tags=["health"])
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/v1/models", tags=["compat"])
+def openai_models_compat() -> dict[str, object]:
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": settings.azure_openai_chat_deployment,
+                "object": "model",
+                "created": 0,
+                "owned_by": settings.app_name,
+            },
+            {
+                "id": settings.azure_openai_embedding_deployment,
+                "object": "model",
+                "created": 0,
+                "owned_by": settings.app_name,
+            },
+        ],
+    }

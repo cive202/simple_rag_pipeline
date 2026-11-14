@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-import json
 from functools import lru_cache
 from typing import Any
+from urllib.parse import urlparse
 
-from pydantic import BaseModel
+from langchain_core.messages import BaseMessage
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+from langgraph.graph.state import CompiledStateGraph
+from langgraph.prebuilt import create_react_agent
 
-from app.core.client import chat_client
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.services.booking import create_booking
@@ -15,79 +18,73 @@ from app.services.vectorstore import QdrantStore
 
 SYSTEM_PROMPT = (
     "You are a helpful recruitment assistant. "
-    "Use the provided retrieved context to answer questions about ingested documents. "
-    "If the answer is not in the context, say you do not know. "
-    "When the user wants to book an interview, collect full name, email, date, and time. "
-    "Respond professionally and do not use emojis."
-)
-
-BOOKING_PROMPT = (
-    "Detect interview booking intent from the conversation. "
-    "Return ONLY JSON with this shape: "
-    '{"is_booking_intent": bool, "full_name": str|null, "email": str|null, '
-    '"date": str|null, "time": str|null}. '
-    "Use date format YYYY-MM-DD and time format HH:MM (24h). "
-    "Use null for unknown fields."
+    "Use the retrieve_context tool to answer questions about ingested documents, "
+    "and answer only from retrieved context. If the answer is not in context, "
+    "say you do not know. When the user wants to book an interview, make sure "
+    "you have their full name, email, date and time, then call book_interview "
+    "to confirm it. Respond professionally and do not use emojis."
 )
 
 
-class BookingIntent(BaseModel):
-    is_booking_intent: bool = False
-    full_name: str | None = None
-    email: str | None = None
-    date: str | None = None
-    time: str | None = None
-
-
-def _extract_json_object(raw: str) -> dict[str, Any]:
-    text = raw.strip()
-    try:
-        data = json.loads(text)
-        return data if isinstance(data, dict) else {}
-    except json.JSONDecodeError:
-        start = text.find("{")
-        end = text.rfind("}")
-        if start == -1 or end == -1 or end <= start:
-            return {}
-        try:
-            data = json.loads(text[start : end + 1])
-        except json.JSONDecodeError:
-            return {}
-        return data if isinstance(data, dict) else {}
-
-
-def _chat(messages: list[dict[str, str]], temperature: float | None = None) -> str:
-    response = chat_client.chat.completions.create(
-        model=settings.azure_openai_chat_deployment,
-        messages=messages,
-        temperature=settings.chat_temperature if temperature is None else temperature,
+def _resolved_chat_credentials() -> tuple[str, str, str | None]:
+    endpoint = settings.azure_openai_chat_endpoint or settings.azure_openai_endpoint
+    api_key = (
+        settings.azure_openai_chat_api_key.get_secret_value()
+        if settings.azure_openai_chat_api_key
+        else settings.azure_openai_api_key.get_secret_value()
     )
-    return (response.choices[0].message.content or "").strip()
+    api_version = settings.azure_openai_chat_api_version or settings.openai_api_version
+    return endpoint, api_key, api_version
 
 
-def _sanitize_history(history: list[dict[str, str]]) -> list[dict[str, str]]:
-    allowed_roles = {"user", "assistant", "system"}
-    clean: list[dict[str, str]] = []
-    for item in history:
-        role = item.get("role")
-        content = item.get("content")
-        if role in allowed_roles and isinstance(content, str):
-            clean.append({"role": role, "content": content})
-    return clean
+def _normalize_endpoint(endpoint: str) -> str:
+    cleaned_endpoint = endpoint.rstrip("/")
+    marker = "/openai/v1"
+    marker_index = cleaned_endpoint.lower().find(marker)
+    if marker_index != -1:
+        cleaned_endpoint = cleaned_endpoint[:marker_index]
+    return cleaned_endpoint
 
 
+@lru_cache
+def _build_model() -> ChatOpenAI:
+    endpoint, api_key, api_version = _resolved_chat_credentials()
+    normalized_endpoint = _normalize_endpoint(endpoint)
+    host = (urlparse(normalized_endpoint).hostname or "").lower()
+
+    kwargs: dict[str, Any] = {
+        "model": settings.azure_openai_chat_deployment,
+        "api_key": api_key,
+        "base_url": f"{normalized_endpoint}/openai/v1/",
+        "temperature": settings.chat_temperature,
+    }
+    if api_version and not host.endswith("services.ai.azure.com"):
+        kwargs["default_query"] = {"api-version": api_version}
+
+    return ChatOpenAI(**kwargs)
+
+
+@tool
 def retrieve_context(query: str) -> str:
     """Search the ingested document knowledge base for the given query."""
+    clean_query = query.strip()
+    if not clean_query:
+        return "No relevant context found."
+
     store = QdrantStore()
     store.ensure_collection()
-    hits = store.search(embed_text(query), top_k=settings.rag_top_k)
+    hits = store.search(embed_text(clean_query), top_k=settings.rag_top_k)
     if not hits:
         return "No relevant context found."
     return "\n\n".join(hit["payload"].get("text", "") for hit in hits)
 
 
+@tool
 def book_interview(full_name: str, email: str, date: str, time: str) -> str:
-    """Book an interview and return confirmation."""
+    """Book an interview.
+
+    Requires full name, email, date (YYYY-MM-DD), and time (HH:MM).
+    """
     db = SessionLocal()
     try:
         booking = create_booking(db, full_name, email, date, time)
@@ -95,71 +92,82 @@ def book_interview(full_name: str, email: str, date: str, time: str) -> str:
         return f"Could not book the interview: {exc}. Please correct the details."
     finally:
         db.close()
+
     return (
         f"Interview confirmed for {full_name} on {date} at {time}. "
         f"Booking reference: #{booking.id}."
     )
 
 
+@lru_cache
+def _build_graph() -> CompiledStateGraph:
+    return create_react_agent(
+        _build_model(),
+        tools=[retrieve_context, book_interview],
+        prompt=SYSTEM_PROMPT,
+    )
+
+
+def _content_to_text(content: Any) -> str:
+    if isinstance(content, str):
+        return content.strip()
+    if not isinstance(content, list):
+        return ""
+
+    parts: list[str] = []
+    for item in content:
+        if isinstance(item, str):
+            text = item.strip()
+            if text:
+                parts.append(text)
+            continue
+
+        if isinstance(item, dict):
+            text = item.get("text")
+            if isinstance(text, str) and text.strip():
+                parts.append(text.strip())
+
+    return "\n".join(parts).strip()
+
+
 class RecruitmentAgent:
-    def _extract_booking_intent(
-        self, query: str, history: list[dict[str, str]]
-    ) -> BookingIntent:
-        messages: list[dict[str, str]] = [{"role": "system", "content": BOOKING_PROMPT}]
-        messages.extend(_sanitize_history(history)[-10:])
-        messages.append({"role": "user", "content": query})
-        raw = _chat(messages, temperature=0.0)
-        data = _extract_json_object(raw)
-        try:
-            return BookingIntent.model_validate(data)
-        except Exception:
-            return BookingIntent()
+    def __init__(self) -> None:
+        self._graph = _build_graph()
 
     @staticmethod
-    def _missing_fields(intent: BookingIntent) -> list[str]:
-        missing: list[str] = []
-        if not intent.full_name:
-            missing.append("full name")
-        if not intent.email:
-            missing.append("email")
-        if not intent.date:
-            missing.append("date (YYYY-MM-DD)")
-        if not intent.time:
-            missing.append("time (HH:MM)")
-        return missing
+    def _sanitize_history(history: list[dict[str, str]]) -> list[tuple[str, str]]:
+        clean: list[tuple[str, str]] = []
+        for item in history[-10:]:
+            if not isinstance(item, dict):
+                continue
+            role = item.get("role")
+            content = item.get("content")
+            if role in {"user", "assistant"} and isinstance(content, str) and content.strip():
+                clean.append((role, content))
+        return clean
 
     def respond(self, query: str, history: list[dict[str, str]]) -> str:
-        booking_intent = self._extract_booking_intent(query, history)
-        if booking_intent.is_booking_intent:
-            missing = self._missing_fields(booking_intent)
-            if missing:
-                return "To book your interview, please provide: " + ", ".join(missing) + "."
-            return book_interview(
-                full_name=booking_intent.full_name or "",
-                email=booking_intent.email or "",
-                date=booking_intent.date or "",
-                time=booking_intent.time or "",
-            )
+        clean_query = query.strip()
+        if not clean_query:
+            return "Please share your question."
 
-        context = retrieve_context(query)
-        if context == "No relevant context found.":
-            return "I do not know based on the available document context."
+        conversation = self._sanitize_history(history)
+        conversation.append(("user", clean_query))
 
-        messages: list[dict[str, str]] = [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {
-                "role": "system",
-                "content": (
-                    "Retrieved context:\n"
-                    f"{context}\n\n"
-                    "Use only this context to answer factual questions."
-                ),
-            },
-        ]
-        messages.extend(_sanitize_history(history)[-10:])
-        messages.append({"role": "user", "content": query})
-        answer = _chat(messages)
-        return answer or "I do not know based on the available document context."
+        state = self._graph.invoke({"messages": conversation})
+        messages = state.get("messages", []) if isinstance(state, dict) else []
+
+        for message in reversed(messages):
+            if isinstance(message, BaseMessage) and message.type == "ai":
+                text = _content_to_text(message.content)
+                if text:
+                    return text
+            if isinstance(message, dict) and message.get("role") == "assistant":
+                text = _content_to_text(message.get("content"))
+                if text:
+                    return text
+
+        return "I do not know based on the available document context."
 
 
 @lru_cache
