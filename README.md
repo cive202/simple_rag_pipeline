@@ -1,6 +1,6 @@
-# Palm Mind
+# FastAPI RAG Backend
 
-Palm Mind is a FastAPI backend for **document ingestion + conversational RAG** with:
+This project is a FastAPI backend for **document ingestion + conversational RAG** with:
 
 - PDF/TXT ingestion
 - Azure OpenAI embeddings + chat
