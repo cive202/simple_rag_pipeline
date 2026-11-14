@@ -6,9 +6,17 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.162.6",
+    "langchain>=1.5.0",
+    "langchain-text-splitters>=1.0.0",
     "numpy>=2.5.4",
     "openai>=3.50.0",
     "pathlib>=1.0.1",
+    "psycopg[binary]>=3.2.12",
     "pydantic-settings>=2.16.3",
+    "python-multipart>=0.0.20",
     "pymupdf4llm>=2.1",
+    "qdrant-client>=1.20.0",
+    "redis>=7.1.0",
+    "sqlalchemy>=2.0.44",
+    "uvicorn>=0.38.0",
 ]

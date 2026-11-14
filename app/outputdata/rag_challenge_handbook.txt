@@ -1,0 +1,333 @@
+NORTHSTAR ANALYTICS — RAG CHALLENGE HANDBOOK
+Synthetic test corpus | Version 3.2 | Published: 14 November 2026
+Document ID: NSA-HR-OPS-032
+All organizations, people, products, policies, and contact details in this handbook are fictional.
+Purpose: evaluate document extraction, chunking, retrieval, grounded answers, multi-turn memory, and interview booking.
+
+======================================================================
+1. ORGANIZATION OVERVIEW
+======================================================================
+
+Northstar Analytics is a fictional data consultancy headquartered in Kathmandu, Nepal. It builds forecasting and decision-support systems for logistics, retail, and public-service organizations.
+
+The company has three operating groups:
+- Applied AI: retrieval systems, evaluation, NLP, and machine-learning services.
+- Data Platforms: ingestion pipelines, analytics infrastructure, and data quality.
+- Client Operations: onboarding, support, and project coordination.
+
+The company’s public support hours are Sunday through Friday, 09:30–17:30 Nepal Time (NPT, UTC+05:45). Saturday is the weekly rest day. The office address is 18 Example Marg, Lazimpat, Kathmandu, Nepal. This is a fictional address and must not be used for real-world navigation.
+
+General contact: hello@northstar.example
+Recruitment contact: talent@northstar.example
+Support reference format: NS-SUP- followed by six digits (example: NS-SUP-104208).
+
+Important distinction: support hours are not the same as interview-booking hours. Interview booking rules are defined in Section 7.
+
+======================================================================
+2. PRODUCT FACTS AND LIMITATIONS
+======================================================================
+
+Product: AtlasDesk
+Purpose: internal knowledge assistant for customer-support teams.
+Supported input formats: PDF, TXT, and DOCX.
+Maximum upload size: 25 MiB per file.
+Maximum number of files per workspace: 200.
+Supported languages for production retrieval: English and Nepali. Other languages may be indexed experimentally but are not covered by the service-level target.
+
+AtlasDesk has two indexing profiles:
+
+A. Balanced profile
+- Default chunking: 700 tokens.
+- Overlap: 100 tokens.
+- Embedding model: northstar-embed-v2 (fictional model name).
+- Intended for mixed policy documents and general knowledge bases.
+
+B. Precision profile
+- Default chunking: 350 tokens.
+- Overlap: 40 tokens.
+- Intended for short technical instructions, tables, and reference material.
+- More chunks may improve local precision but can separate context that belongs together.
+
+The profile defaults are not hard limits. A workspace administrator may configure chunk size between 150 and 1,200 tokens. Overlap must be at least 0 and no more than 25% of chunk size.
+
+AtlasDesk does not guarantee correct answers when:
+1. a document is out of date;
+2. the retrieved passage omits a necessary exception;
+3. two documents disagree and neither has an authoritative version;
+4. a user asks for information that is not present in the indexed corpus.
+
+The assistant should say that information is unavailable rather than inventing a policy, date, price, or person.
+
+======================================================================
+3. DATA RETENTION AND SECURITY POLICY
+======================================================================
+
+Current policy: SEC-RET-2026-04, effective 1 October 2026.
+
+- Uploaded source files are retained until a workspace administrator deletes them.
+- Extracted text and generated chunks are retained until the source file is deleted or re-indexed.
+- Query logs are retained for 30 days.
+- Conversation memory is retained for 14 days after the most recent message in that conversation.
+- Interview booking records are retained for 180 days after the scheduled interview date, unless a legal hold applies.
+- API credentials must be stored in a secret manager or environment variables. They must never be committed to source control.
+- Personal data in interview bookings must not be included in application logs unless strictly required for troubleshooting. If logged, email addresses must be masked.
+
+Deletion workflow:
+1. An authorized workspace administrator submits a deletion request.
+2. The system marks the source for deletion.
+3. The vector record IDs associated with the source are deleted.
+4. The SQL metadata record is marked deleted.
+5. A deletion event is recorded with the request ID and timestamp.
+
+A successful SQL soft-delete does not prove that vectors were deleted. The deletion workflow is complete only after both the metadata state and vector-store state have been checked.
+
+Legacy policy note — DO NOT APPLY:
+An archived document named SEC-RET-2025-01 stated that query logs were retained for 90 days and conversation memory for 30 days. That policy expired on 30 September 2026. If a question asks for the current retention period, use SEC-RET-2026-04: query logs 30 days; conversation memory 14 days.
+
+======================================================================
+4. TECHNICAL OPERATIONS: INGESTION AND RETRIEVAL
+======================================================================
+
+Recommended ingestion sequence:
+1. Validate file extension and MIME type.
+2. Enforce the configured upload-size limit.
+3. Extract text while preserving page boundaries where possible.
+4. Normalize whitespace without removing meaningful punctuation or table values.
+5. Attach metadata: document_id, filename, page_number, section_heading, source_version, and ingestion_timestamp.
+6. Split the text using the selected chunking strategy.
+7. Generate one embedding per chunk.
+8. Upsert vectors with stable IDs and metadata into the vector database.
+9. Save document and chunk metadata in the relational database.
+10. Return a document ID and ingestion summary.
+
+Two supported chunking strategies for this evaluation:
+- Fixed-size: split by a configured token or character budget, with a defined overlap. It is predictable and easy to reproduce. It may split a sentence, table row, or exception from the rule it qualifies.
+- Semantic: split at meaningful boundaries such as headings, paragraphs, sentence groups, or topic changes, subject to a maximum chunk size. It can preserve related ideas but may produce uneven chunk lengths.
+
+A semantic splitter must still enforce a maximum chunk size. A single very long paragraph must not create an unbounded chunk. If a table is extracted, preserve row labels and column headings with the values.
+
+Retrieval guidance:
+- Apply metadata filters before or during vector search when the user specifies a document, version, or department.
+- Retrieve more than one candidate passage when an answer may depend on an exception.
+- Reranking is optional, but if used, preserve the source IDs and scores for traceability.
+- Construct the final context from retrieved passages and their metadata.
+- The model must answer only from the supplied context for corpus-specific facts.
+- If the retrieved evidence is contradictory, explain the conflict and prefer an explicitly current, effective policy over an archived one.
+- Cite document ID and section in the API response where possible.
+
+Failure scenario:
+A developer indexes only the first page of a PDF but stores the whole PDF filename as metadata. A query about Section 7 may still retrieve a weakly related chunk from page 1. The presence of a filename in metadata is not proof that the relevant page was extracted or indexed.
+
+======================================================================
+5. SERVICE LEVEL TARGETS AND EDGE CASES
+======================================================================
+
+Metric                                      Target
+------------------------------------------------------------
+Document ingestion, 10-page text PDF        under 20 seconds
+Document ingestion, 2 MiB TXT               under 5 seconds
+Vector search, p95                           under 800 ms
+End-to-end answer, p95                       under 6 seconds
+Availability target                          99.5% monthly
+Maximum upload size                           25 MiB
+Maximum files per workspace                   200
+
+These are evaluation targets, not contractual guarantees. The system should return a clear error when a limit is exceeded.
+
+Error codes:
+- ING-400: unsupported file type.
+- ING-413: upload exceeds size limit.
+- ING-422: file is valid but no extractable text was found.
+- ING-500: extraction or embedding provider failed.
+- RET-404: no relevant evidence found.
+- RET-409: retrieved sources contain unresolved conflicting versions.
+- BOOK-400: invalid booking fields.
+- BOOK-409: requested slot is unavailable or conflicts with an existing booking.
+
+Edge case A — scanned PDF:
+A PDF contains images of pages but no selectable text. The text extractor returns an empty string. The correct behavior is to return ING-422 or invoke an explicitly supported OCR path. Do not silently report successful ingestion with zero chunks.
+
+Edge case B — repeated upload:
+The same file is uploaded twice. Use a content hash to detect duplicates if deduplication is enabled. Do not assume identical filenames mean identical contents.
+
+Edge case C — partial failure:
+Vector upsert succeeds for 8 of 10 chunks and then fails. The ingestion job must record partial state and either retry safely or roll back the successful upserts. It must not report the document as fully indexed.
+
+Edge case D — stale answer:
+A query retrieves both the current retention policy and an archived policy. The answer must use the current policy and explain that the archived values are obsolete if relevant.
+
+======================================================================
+6. FAQ AND CROSS-SECTION QUESTIONS
+======================================================================
+
+Q: Does AtlasDesk support DOCX?
+A: Yes. The supported formats are PDF, TXT, and DOCX.
+
+Q: Is Saturday included in public support hours?
+A: No. Saturday is the weekly rest day. Public support runs Sunday through Friday, 09:30–17:30 NPT.
+
+Q: Can a workspace administrator set a chunk size of 1,500 tokens?
+A: No. The configurable range is 150–1,200 tokens.
+
+Q: If the SQL metadata row is marked deleted, is deletion complete?
+A: No. The associated vector records must also be deleted and checked.
+
+Q: Which policy controls current chat-memory retention?
+A: SEC-RET-2026-04, effective 1 October 2026. Conversation memory is retained for 14 days after the most recent message.
+
+Q: Can the assistant invent a missing interview slot if the user insists?
+A: No. It must check availability and offer only available slots.
+
+Q: What is the maximum upload size, and what error should be returned for a larger file?
+A: 25 MiB; return ING-413.
+
+Cross-section challenge:
+A customer asks: “We uploaded a 30 MiB scanned PDF on Saturday. Can it be indexed, and when can we contact support?”
+Correct reasoning:
+- 30 MiB exceeds the 25 MiB upload limit, so return ING-413 before extraction.
+- Even if the file were within the size limit, a scanned PDF with no selectable text requires OCR or returns ING-422.
+- Saturday is not a public support day. Support resumes Sunday at 09:30 NPT.
+Do not confuse support hours with interview booking hours.
+
+======================================================================
+7. INTERVIEW BOOKING POLICY — CURRENT
+======================================================================
+
+Booking system: Northstar Talent Scheduler
+Booking timezone: Nepal Time (NPT, UTC+05:45).
+Interview duration: 30 minutes.
+Permitted booking days: Tuesday and Thursday only.
+Permitted start times: 10:00, 10:30, 11:00, 11:30, 13:00, 13:30, 14:00, 14:30, 15:00, and 15:30 NPT.
+The last permitted start time is 15:30 because the interview must finish by 16:00.
+Minimum advance notice: 24 hours.
+Maximum booking horizon: 30 calendar days.
+No interviews are scheduled on public holidays or on the blackout date 20 November 2026.
+A slot is not confirmed until the booking service returns a booking ID.
+
+Required fields:
+- Full name
+- Valid email address
+- Interview date
+- Interview start time
+
+Validation rules:
+1. Name must contain at least two non-whitespace characters.
+2. Email must have a plausible local part and domain.
+3. Date must be a Tuesday or Thursday.
+4. Time must match one of the permitted start times.
+5. The requested start time must be at least 24 hours in the future.
+6. The date must be within the next 30 calendar days.
+7. The slot must not be a holiday, blackout date, or already-booked slot.
+8. Do not infer or silently change the user's timezone. If the user supplies a timezone other than NPT, convert explicitly and confirm the NPT time before booking.
+
+Booking conversation behavior:
+- Ask for missing required fields one at a time.
+- If the user provides a date but no year, resolve it only if unambiguous; otherwise ask.
+- If the user says “next Thursday,” confirm the interpreted calendar date before creating the booking.
+- If a requested time is unavailable, offer alternatives from the permitted times on an eligible date.
+- Do not claim a booking is confirmed until a booking ID is returned.
+- Before final submission, summarize name, email, date, time, and timezone for confirmation.
+- Never fabricate an email address or fill in missing personal details.
+
+Example valid-format request (availability still must be checked):
+Name: Maya Shrestha
+Email: maya.shrestha@example.com
+Date: 24 November 2026
+Time: 10:30 NPT
+
+Example invalid request:
+Name: M. S.
+Email: maya.example.com
+Date: Saturday, 21 November 2026
+Time: 09:00 NPT
+Reasons: name is too short/ambiguous; email has no valid domain separator; Saturday is not an interview day; 09:00 is not a permitted start time; date is also outside the allowed interview weekday rule.
+
+Privacy:
+Do not repeat a candidate's email unnecessarily in conversational responses. Store only the fields required for the booking and operational audit.
+
+======================================================================
+8. ADVERSARIAL QUESTION SET
+======================================================================
+
+Use these prompts to test retrieval quality. Ask them exactly, then try paraphrases.
+
+1. What is the current conversation-memory retention period? Why might another passage say 30 days?
+2. Can I upload a 26 MiB PDF? Which error code should I receive?
+3. The database says a document is deleted. What else must be verified?
+4. What are the two chunking strategies, and what failure can happen to a table under fixed-size chunking?
+5. A PDF is 10 MiB but scanned. Is the file size acceptable, and will normal text extraction work?
+6. Is the office open on Saturday? Is interview booking available on Saturday?
+7. What is the latest permitted interview start time, and why is 16:00 not a valid start?
+8. Can I book Tuesday at 09:30 NPT? Explain using the policy.
+9. A candidate asks for Thursday at 14:00 but gives no email. What should the assistant do next?
+10. If vector upsert succeeds for 8 out of 10 chunks, can ingestion be reported as complete?
+11. Which source wins if SEC-RET-2025-01 conflicts with SEC-RET-2026-04?
+12. A user asks for the exact number of files currently stored in their workspace. Is that information in this handbook?
+
+Expected answer to question 12: No. The handbook states a maximum of 200 files per workspace, not the current number stored. The assistant must not confuse a limit with a live count.
+
+======================================================================
+9. MULTI-TURN MEMORY TEST SCRIPT
+======================================================================
+
+Run these messages in one conversation, in order:
+
+User: My name is Aarav Karki and my email is aarav.karki@example.com.
+User: I want an interview on Thursday at 14:00 NPT.
+User: Actually, make it Tuesday instead.
+User: Keep the same time and email.
+User: What details do you have so far?
+User: Before booking, tell me the interview duration and timezone.
+
+Expected behavior:
+- Retain the name and email from the first message.
+- Update only the date/day when the user changes it.
+- Preserve the 14:00 time and email.
+- Do not invent a calendar date if “Tuesday” is ambiguous; ask for the exact date.
+- State that the duration is 30 minutes and timezone is NPT.
+- Do not confirm a booking unless a real availability check and booking operation succeed.
+
+Second multi-turn test:
+User: My name is Lina Rai.
+User: My email is lina.rai@example.com.
+User: Book me for 20 November 2026 at 10:00 NPT.
+User: If that date is blocked, what alternatives are allowed?
+
+Expected behavior:
+- Identify 20 November 2026 as a blackout date.
+- Do not book it.
+- Ask for or propose another Tuesday or Thursday within the 30-day horizon, with a permitted time, at least 24 hours ahead.
+- Check availability before confirming.
+
+======================================================================
+10. EVALUATION CHECKLIST
+======================================================================
+
+Ingestion:
+[ ] TXT upload succeeds.
+[ ] PDF upload succeeds and page metadata is preserved.
+[ ] Unsupported extension returns ING-400.
+[ ] Oversized upload returns ING-413.
+[ ] Scanned PDF does not falsely report successful text extraction.
+[ ] Fixed-size and semantic chunking are both selectable.
+[ ] Chunk metadata includes source document and section/page information.
+[ ] Embedding failure is handled without marking the document indexed.
+[ ] Vector records and SQL metadata can be reconciled.
+
+Retrieval:
+[ ] Answers cite or identify supporting document sections.
+[ ] Current policy is preferred over archived policy.
+[ ] Exceptions are retrieved alongside general rules.
+[ ] The assistant distinguishes maximum capacity from current usage.
+[ ] Missing information is acknowledged rather than invented.
+[ ] Multi-turn details persist in Redis and can be updated selectively.
+
+Booking:
+[ ] Required fields are collected.
+[ ] Date, weekday, time, timezone, notice, and horizon are validated.
+[ ] Blackout date is rejected.
+[ ] Unavailable slots are not represented as confirmed.
+[ ] Booking is stored and a booking ID is returned only after success.
+[ ] Sensitive details are not unnecessarily exposed in logs.
+
+END OF HANDBOOK
