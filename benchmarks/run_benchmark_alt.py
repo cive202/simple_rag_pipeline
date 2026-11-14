@@ -1,7 +1,7 @@
 """Dual-dataset retrieval benchmark.
 
 Benchmarks Dataset 1 and Dataset 2 in one run, then writes a single
-combined finding markdown file.
+combined findings markdown file.
 
 Default datasets:
   - Dataset 1: benchmarks/corpus.txt
@@ -34,7 +34,7 @@ from app.services.embeddings import embed_texts
 
 DEFAULT_DATASET_1_PATH = Path("benchmarks/corpus.txt")
 DEFAULT_DATASET_2_PATH = Path("train-00000-of-00001.parquet")
-DEFAULT_FINDINGS_PATH = Path("finding.md")
+DEFAULT_FINDINGS_PATH = Path("findings.md")
 DEFAULT_CHUNK_SIZE = 250
 DEFAULT_CHUNK_OVERLAP = 40
 DEFAULT_TOP_K = 3
