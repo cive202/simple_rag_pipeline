@@ -19,4 +19,5 @@ dependencies = [
     "redis>=7.1.0",
     "sqlalchemy>=2.0.44",
     "uvicorn>=0.38.0",
+    "pyarrow>=26.0.1",
 ]

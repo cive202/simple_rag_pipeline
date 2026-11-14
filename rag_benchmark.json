@@ -1,0 +1,637 @@
+{
+  "dataset_name": "Palm Mind AI - Conversational RAG Benchmark",
+  "version": "1.0",
+  "description": "A starter evaluation set based only on the supplied Machine Learning and AI Reference Notes. Includes single-turn retrieval, multi-turn follow-ups, and out-of-scope abstention tests.",
+  "source_corpus": "Machine Learning and AI Reference Notes supplied by the user",
+  "record_count": 39,
+  "schema_notes": {
+    "query": "The exact user message for this turn.",
+    "chat_history": "Prior conversation messages to provide to the conversational RAG system.",
+    "standalone_query": "Expected context-independent rewrite. Use this to evaluate query rewriting.",
+    "expected_answer": "Reference answer for answer-quality evaluation.",
+    "expected_context": "Relevant source sentence(s); empty for unanswerable questions.",
+    "query_type": "single_turn, multi_turn, or unanswerable"
+  },
+  "items": [
+    {
+      "id": "ST001",
+      "conversation_id": "single_001",
+      "turn": 1,
+      "query": "What is supervised learning?",
+      "chat_history": [],
+      "standalone_query": "What is supervised learning?",
+      "expected_answer": "Supervised learning trains a model on labeled examples where every input has a known target output.",
+      "expected_context": [
+        "Supervised learning trains a model on labeled examples where every input has a known target output."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST002",
+      "conversation_id": "single_002",
+      "turn": 1,
+      "query": "How does unsupervised learning work?",
+      "chat_history": [],
+      "standalone_query": "How does unsupervised learning work?",
+      "expected_answer": "Unsupervised learning discovers hidden structure in unlabeled data, for example by grouping similar points into clusters.",
+      "expected_context": [
+        "Unsupervised learning discovers hidden structure in unlabeled data, for example by grouping similar points into clusters."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST003",
+      "conversation_id": "single_003",
+      "turn": 1,
+      "query": "What is the difference between semi-supervised and self-supervised learning?",
+      "chat_history": [],
+      "standalone_query": "What is the difference between semi-supervised and self-supervised learning?",
+      "expected_answer": "Semi-supervised learning combines a small amount of labeled data with a large amount of unlabeled data. Self-supervised learning creates training labels from raw data, such as predicting a masked word.",
+      "expected_context": [
+        "Semi-supervised learning combines a small amount of labeled data with a large amount of unlabeled data during training.",
+        "Self-supervised learning creates its own training labels from the raw data, such as predicting a masked word in a sentence."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ST004",
+      "conversation_id": "single_004",
+      "turn": 1,
+      "query": "What does an agent learn in reinforcement learning?",
+      "chat_history": [],
+      "standalone_query": "What does an agent learn in reinforcement learning?",
+      "expected_answer": "An agent learns to choose actions using rewards for good outcomes and penalties for bad ones.",
+      "expected_context": [
+        "Reinforcement learning trains an agent to choose actions by giving rewards for good outcomes and penalties for bad ones."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST005",
+      "conversation_id": "single_005",
+      "turn": 1,
+      "query": "Define precision and recall.",
+      "chat_history": [],
+      "standalone_query": "Define precision and recall.",
+      "expected_answer": "Precision is the fraction of predicted positive cases that are correct. Recall is the fraction of real positive cases that the model successfully identifies.",
+      "expected_context": [
+        "Precision measures the fraction of predicted positive cases that are actually correct.",
+        "Recall measures the fraction of real positive cases that the model successfully identified."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST006",
+      "conversation_id": "single_006",
+      "turn": 1,
+      "query": "What does the F1 score tell us?",
+      "chat_history": [],
+      "standalone_query": "What does the F1 score tell us?",
+      "expected_answer": "The F1 score is the harmonic mean of precision and recall, balancing the two into one metric.",
+      "expected_context": [
+        "The F1 score is the harmonic mean of precision and recall, balancing the two into a single number."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST007",
+      "conversation_id": "single_007",
+      "turn": 1,
+      "query": "Which four outcomes are counted in a confusion matrix?",
+      "chat_history": [],
+      "standalone_query": "Which four outcomes are counted in a confusion matrix?",
+      "expected_answer": "A confusion matrix counts true positives, false positives, true negatives, and false negatives.",
+      "expected_context": [
+        "A confusion matrix is a table that counts true positives, false positives, true negatives, and false negatives."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST008",
+      "conversation_id": "single_008",
+      "turn": 1,
+      "query": "What is the ROC curve plotting?",
+      "chat_history": [],
+      "standalone_query": "What is the ROC curve plotting?",
+      "expected_answer": "The ROC curve plots the true positive rate against the false positive rate at different decision thresholds.",
+      "expected_context": [
+        "The ROC curve plots the true positive rate against the false positive rate at different decision thresholds."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ST009",
+      "conversation_id": "single_009",
+      "turn": 1,
+      "query": "Explain overfitting in machine learning.",
+      "chat_history": [],
+      "standalone_query": "Explain overfitting in machine learning.",
+      "expected_answer": "Overfitting occurs when a model memorizes training data, including noise, and performs poorly on new examples.",
+      "expected_context": [
+        "Overfitting happens when a model memorizes the training data including its noise and fails on new examples."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST010",
+      "conversation_id": "single_010",
+      "turn": 1,
+      "query": "How are L1 and L2 regularization different?",
+      "chat_history": [],
+      "standalone_query": "How are L1 and L2 regularization different?",
+      "expected_answer": "L1 regularization can drive some weights exactly to zero, producing sparse models. L2 regularization smoothly shrinks weights toward zero but rarely makes them exactly zero.",
+      "expected_context": [
+        "L1 regularization, also called Lasso, drives some weights exactly to zero and produces sparse models.",
+        "L2 regularization, also called Ridge, shrinks weights smoothly toward zero but rarely makes them exactly zero."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ST011",
+      "conversation_id": "single_011",
+      "turn": 1,
+      "query": "What is dropout used for?",
+      "chat_history": [],
+      "standalone_query": "What is dropout used for?",
+      "expected_answer": "Dropout randomly disables a fraction of neurons during training to reduce overfitting in neural networks.",
+      "expected_context": [
+        "Dropout randomly disables a fraction of neurons during training to reduce overfitting in neural networks."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST012",
+      "conversation_id": "single_012",
+      "turn": 1,
+      "query": "What does the learning rate control?",
+      "chat_history": [],
+      "standalone_query": "What does the learning rate control?",
+      "expected_answer": "The learning rate controls the size of each parameter update step during optimization.",
+      "expected_context": [
+        "The learning rate controls how large each parameter update step is during optimization."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST013",
+      "conversation_id": "single_013",
+      "turn": 1,
+      "query": "How does backpropagation calculate gradients?",
+      "chat_history": [],
+      "standalone_query": "How does backpropagation calculate gradients?",
+      "expected_answer": "Backpropagation computes gradients by applying the chain rule backward through the network layers.",
+      "expected_context": [
+        "Backpropagation computes gradients by applying the chain rule backward through the network layers."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ST014",
+      "conversation_id": "single_014",
+      "turn": 1,
+      "query": "What is the vanishing gradient problem?",
+      "chat_history": [],
+      "standalone_query": "What is the vanishing gradient problem?",
+      "expected_answer": "It occurs when gradients shrink toward zero, causing early layers to stop learning effectively.",
+      "expected_context": [
+        "The vanishing gradient problem occurs when gradients shrink toward zero so early layers stop learning."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ST015",
+      "conversation_id": "single_015",
+      "turn": 1,
+      "query": "What makes an LSTM different from a basic RNN?",
+      "chat_history": [],
+      "standalone_query": "What makes an LSTM different from a basic RNN?",
+      "expected_answer": "An LSTM adds gates to a recurrent network so it can remember information over long sequences.",
+      "expected_context": [
+        "Long short-term memory networks add gates to a recurrent network so it can remember information over long sequences."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ST016",
+      "conversation_id": "single_016",
+      "turn": 1,
+      "query": "What is self-attention?",
+      "chat_history": [],
+      "standalone_query": "What is self-attention?",
+      "expected_answer": "Self-attention lets each token in a sequence weigh the importance of every other token when forming its representation.",
+      "expected_context": [
+        "Self-attention lets each token in a sequence weigh the importance of every other token when forming its representation."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST017",
+      "conversation_id": "single_017",
+      "turn": 1,
+      "query": "What is cosine similarity and what does it ignore?",
+      "chat_history": [],
+      "standalone_query": "What is cosine similarity and what does it ignore?",
+      "expected_answer": "Cosine similarity measures the angle between two vectors and ignores their magnitude.",
+      "expected_context": [
+        "Cosine similarity measures the angle between two vectors and ignores their magnitude."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "ST018",
+      "conversation_id": "single_018",
+      "turn": 1,
+      "query": "How is Euclidean distance different from cosine similarity?",
+      "chat_history": [],
+      "standalone_query": "How is Euclidean distance different from cosine similarity?",
+      "expected_answer": "Euclidean distance measures straight-line distance between two points, while cosine similarity measures the angle between two vectors and ignores magnitude.",
+      "expected_context": [
+        "Euclidean distance measures the straight-line distance between two points in vector space.",
+        "Cosine similarity measures the angle between two vectors and ignores their magnitude."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ST019",
+      "conversation_id": "single_019",
+      "turn": 1,
+      "query": "What does approximate nearest neighbor search trade off?",
+      "chat_history": [],
+      "standalone_query": "What does approximate nearest neighbor search trade off?",
+      "expected_answer": "Approximate nearest neighbor search trades a little accuracy for much faster retrieval in large vector sets.",
+      "expected_context": [
+        "Approximate nearest neighbor search trades a little accuracy for much faster retrieval in large vector sets."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "ST020",
+      "conversation_id": "single_020",
+      "turn": 1,
+      "query": "Compare bagging and boosting.",
+      "chat_history": [],
+      "standalone_query": "Compare bagging and boosting.",
+      "expected_answer": "Bagging trains models on random subsets in parallel and averages predictions to reduce variance. Boosting trains models sequentially, with each new model focusing on errors made by the previous one.",
+      "expected_context": [
+        "Bagging trains many models on random subsets of the data in parallel and averages their predictions to reduce variance.",
+        "Boosting trains models sequentially where each new model focuses on the errors made by the previous ones."
+      ],
+      "query_type": "single_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "MT001",
+      "conversation_id": "multi_001",
+      "turn": 1,
+      "query": "What is supervised learning?",
+      "chat_history": [],
+      "standalone_query": "What is supervised learning?",
+      "expected_answer": "Supervised learning trains a model on labeled examples where every input has a known target output.",
+      "expected_context": [
+        "Supervised learning trains a model on labeled examples where every input has a known target output."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "MT002",
+      "conversation_id": "multi_001",
+      "turn": 2,
+      "query": "How is it different from unsupervised learning?",
+      "chat_history": [
+        {
+          "role": "user",
+          "content": "What is supervised learning?"
+        },
+        {
+          "role": "assistant",
+          "content": "Supervised learning trains a model on labeled examples where every input has a known target output."
+        }
+      ],
+      "standalone_query": "How is supervised learning different from unsupervised learning?",
+      "expected_answer": "Supervised learning uses labeled examples with known target outputs. Unsupervised learning discovers hidden structure in unlabeled data, such as clusters.",
+      "expected_context": [
+        "Supervised learning trains a model on labeled examples where every input has a known target output.",
+        "Unsupervised learning discovers hidden structure in unlabeled data, for example by grouping similar points into clusters."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "MT003",
+      "conversation_id": "multi_002",
+      "turn": 1,
+      "query": "What are precision and recall?",
+      "chat_history": [],
+      "standalone_query": "What are precision and recall?",
+      "expected_answer": "Precision measures how many predicted positive cases are correct. Recall measures how many actual positive cases the model identifies.",
+      "expected_context": [
+        "Precision measures the fraction of predicted positive cases that are actually correct.",
+        "Recall measures the fraction of real positive cases that the model successfully identified."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "MT004",
+      "conversation_id": "multi_002",
+      "turn": 2,
+      "query": "How can I combine those into one score?",
+      "chat_history": [
+        {
+          "role": "user",
+          "content": "What are precision and recall?"
+        },
+        {
+          "role": "assistant",
+          "content": "Precision measures how many predicted positive cases are correct. Recall measures how many actual positive cases the model identifies."
+        }
+      ],
+      "standalone_query": "How can precision and recall be combined into one score?",
+      "expected_answer": "The F1 score combines precision and recall using their harmonic mean.",
+      "expected_context": [
+        "The F1 score is the harmonic mean of precision and recall, balancing the two into a single number."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "MT005",
+      "conversation_id": "multi_003",
+      "turn": 1,
+      "query": "Explain L1 regularization.",
+      "chat_history": [],
+      "standalone_query": "Explain L1 regularization.",
+      "expected_answer": "L1 regularization, also called Lasso, drives some weights exactly to zero and produces sparse models.",
+      "expected_context": [
+        "L1 regularization, also called Lasso, drives some weights exactly to zero and produces sparse models."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "MT006",
+      "conversation_id": "multi_003",
+      "turn": 2,
+      "query": "And how does the other one work?",
+      "chat_history": [
+        {
+          "role": "user",
+          "content": "Explain L1 regularization."
+        },
+        {
+          "role": "assistant",
+          "content": "L1 regularization, also called Lasso, can drive some weights to zero."
+        }
+      ],
+      "standalone_query": "How does L2 regularization work?",
+      "expected_answer": "L2 regularization, also called Ridge, shrinks weights smoothly toward zero but rarely makes them exactly zero.",
+      "expected_context": [
+        "L2 regularization, also called Ridge, shrinks weights smoothly toward zero but rarely makes them exactly zero."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "MT007",
+      "conversation_id": "multi_004",
+      "turn": 1,
+      "query": "What is a transformer?",
+      "chat_history": [],
+      "standalone_query": "What is a transformer?",
+      "expected_answer": "The transformer is a neural network architecture that replaced recurrence with self-attention and was introduced in 2017.",
+      "expected_context": [
+        "The transformer architecture replaced recurrence with self-attention and was introduced in 2017."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "MT008",
+      "conversation_id": "multi_004",
+      "turn": 2,
+      "query": "What mechanism does it use to relate tokens?",
+      "chat_history": [
+        {
+          "role": "user",
+          "content": "What is a transformer?"
+        },
+        {
+          "role": "assistant",
+          "content": "The transformer architecture replaced recurrence with self-attention."
+        }
+      ],
+      "standalone_query": "What mechanism does the transformer use to relate tokens to one another?",
+      "expected_answer": "It uses self-attention, which lets each token weigh the importance of every other token when forming its representation.",
+      "expected_context": [
+        "Self-attention lets each token in a sequence weigh the importance of every other token when forming its representation."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "MT009",
+      "conversation_id": "multi_005",
+      "turn": 1,
+      "query": "What is a vector database?",
+      "chat_history": [],
+      "standalone_query": "What is a vector database?",
+      "expected_answer": "A vector database stores embeddings and retrieves the nearest neighbors to a query vector.",
+      "expected_context": [
+        "A vector database stores embeddings and retrieves the nearest neighbors to a query vector."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "MT010",
+      "conversation_id": "multi_005",
+      "turn": 2,
+      "query": "How does it find similar items quickly at scale?",
+      "chat_history": [
+        {
+          "role": "user",
+          "content": "What is a vector database?"
+        },
+        {
+          "role": "assistant",
+          "content": "A vector database stores embeddings and retrieves nearest neighbors to a query vector."
+        }
+      ],
+      "standalone_query": "How can a vector database find similar items quickly at scale?",
+      "expected_answer": "It can use approximate nearest neighbor search, which trades a little accuracy for much faster retrieval in large vector sets.",
+      "expected_context": [
+        "Approximate nearest neighbor search trades a little accuracy for much faster retrieval in large vector sets."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "MT011",
+      "conversation_id": "multi_006",
+      "turn": 1,
+      "query": "What is an RNN?",
+      "chat_history": [],
+      "standalone_query": "What is a recurrent neural network?",
+      "expected_answer": "A recurrent neural network maintains a hidden state across time steps and handles sequential data such as text or audio.",
+      "expected_context": [
+        "A recurrent neural network maintains a hidden state across time steps and handles sequential data like text or audio."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "MT012",
+      "conversation_id": "multi_006",
+      "turn": 2,
+      "query": "How does an LSTM improve on that?",
+      "chat_history": [
+        {
+          "role": "user",
+          "content": "What is an RNN?"
+        },
+        {
+          "role": "assistant",
+          "content": "A recurrent neural network maintains a hidden state across time steps."
+        }
+      ],
+      "standalone_query": "How does an LSTM improve on a basic recurrent neural network?",
+      "expected_answer": "An LSTM adds gates to a recurrent network so it can remember information over long sequences.",
+      "expected_context": [
+        "Long short-term memory networks add gates to a recurrent network so it can remember information over long sequences."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "MT013",
+      "conversation_id": "multi_007",
+      "turn": 1,
+      "query": "What is gradient descent?",
+      "chat_history": [],
+      "standalone_query": "What is gradient descent?",
+      "expected_answer": "Gradient descent updates model parameters in the direction that reduces the loss function.",
+      "expected_context": [
+        "Gradient descent updates model parameters in the direction that reduces the loss function."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "MT014",
+      "conversation_id": "multi_007",
+      "turn": 2,
+      "query": "What determines how big each update is?",
+      "chat_history": [
+        {
+          "role": "user",
+          "content": "What is gradient descent?"
+        },
+        {
+          "role": "assistant",
+          "content": "Gradient descent updates model parameters in the direction that reduces the loss function."
+        }
+      ],
+      "standalone_query": "What determines the size of each parameter update in gradient descent?",
+      "expected_answer": "The learning rate controls how large each parameter update step is during optimization.",
+      "expected_context": [
+        "The learning rate controls how large each parameter update step is during optimization."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "MT015",
+      "conversation_id": "multi_008",
+      "turn": 1,
+      "query": "What is bagging?",
+      "chat_history": [],
+      "standalone_query": "What is bagging?",
+      "expected_answer": "Bagging trains many models on random subsets of data in parallel and averages their predictions to reduce variance.",
+      "expected_context": [
+        "Bagging trains many models on random subsets of the data in parallel and averages their predictions to reduce variance."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "easy"
+    },
+    {
+      "id": "MT016",
+      "conversation_id": "multi_008",
+      "turn": 2,
+      "query": "How is boosting different?",
+      "chat_history": [
+        {
+          "role": "user",
+          "content": "What is bagging?"
+        },
+        {
+          "role": "assistant",
+          "content": "Bagging trains many models on random subsets in parallel and averages their predictions."
+        }
+      ],
+      "standalone_query": "How is boosting different from bagging?",
+      "expected_answer": "Boosting trains models sequentially, with each new model focusing on errors made by the previous models, whereas bagging trains models in parallel on random subsets.",
+      "expected_context": [
+        "Boosting trains models sequentially where each new model focuses on the errors made by the previous ones.",
+        "Bagging trains many models on random subsets of the data in parallel and averages their predictions to reduce variance."
+      ],
+      "query_type": "multi_turn",
+      "difficulty": "medium"
+    },
+    {
+      "id": "UA001",
+      "conversation_id": "unanswerable_001",
+      "turn": 1,
+      "query": "Who invented Python?",
+      "chat_history": [],
+      "standalone_query": "Who invented Python?",
+      "expected_answer": "The provided knowledge base does not contain this information. The assistant should say it cannot answer from the available documents rather than inventing an answer.",
+      "expected_context": [],
+      "query_type": "unanswerable",
+      "difficulty": "easy"
+    },
+    {
+      "id": "UA002",
+      "conversation_id": "unanswerable_002",
+      "turn": 1,
+      "query": "What is the current price of an NVIDIA RTX 5090 in Nepal?",
+      "chat_history": [],
+      "standalone_query": "What is the current price of an NVIDIA RTX 5090 in Nepal?",
+      "expected_answer": "The provided knowledge base does not contain current product prices. The assistant should abstain or explain that the information is unavailable in the documents.",
+      "expected_context": [],
+      "query_type": "unanswerable",
+      "difficulty": "easy"
+    },
+    {
+      "id": "UA003",
+      "conversation_id": "unanswerable_003",
+      "turn": 1,
+      "query": "What is the exact formula for the Adam optimizer?",
+      "chat_history": [],
+      "standalone_query": "What is the exact formula for the Adam optimizer?",
+      "expected_answer": "The provided knowledge base does not describe the Adam optimizer or give its formula. The assistant should not fabricate an answer.",
+      "expected_context": [],
+      "query_type": "unanswerable",
+      "difficulty": "medium"
+    }
+  ]
+}
